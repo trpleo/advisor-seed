@@ -10,7 +10,8 @@ trait StatusService extends BaseService {
   protected val serviceName = "advisorv2/StatusService"
   protected val routes = pathPrefix("status") {
     get {
-      log.info("/status executed")
+
+      log.debug("/status request")
 
       val runtimeMxBean = ManagementFactory.getRuntimeMXBean
       val status = Duration(runtimeMxBean.getUptime, MILLISECONDS).toString()
@@ -30,7 +31,11 @@ trait StatusService extends BaseService {
       val buildnumber = com.smartfocus.advisorv2.BuildInfo.buildInfoBuildNumber
       val at = com.smartfocus.advisorv2.BuildInfo.builtAtString
 
-      complete(Status(status, MemoryStatus(s"$totalMemory MB", s"$freeMemory MB", s"$usedMemory MB"), javaArgs, name, s"$ver::$buildnumber", at))
+      val statusObj = Status(status, MemoryStatus(s"$totalMemory MB", s"$freeMemory MB", s"$usedMemory MB"), javaArgs, name, s"$ver::$buildnumber", at)
+
+      log.info(s"/status request: [$statusObj]")
+
+      complete(statusObj)
     }
   }
 
