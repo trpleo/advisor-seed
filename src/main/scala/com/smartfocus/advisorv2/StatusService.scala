@@ -1,14 +1,16 @@
 package com.smartfocus.advisorv2
 
 import java.lang.management.ManagementFactory
+import akka.actor.ActorSystem
 import akka.http.scaladsl.server.Directives._
+import akka.stream.ActorMaterializer
 import scala.concurrent.duration._
 import scala.collection.JavaConversions._
 import scala.util.Try
 
-trait StatusService extends BaseService {
-  protected val serviceName = "advisorv2/StatusService"
-  protected val routes = pathPrefix("status") {
+case class StatusService(implicit val system: ActorSystem, implicit val materializer: ActorMaterializer) extends BaseService {
+  val serviceName = s"$serviceNamePrefix/StatusService"
+  val routes = pathPrefix("status") {
     get {
 
       log.debug("/status request")
@@ -37,7 +39,12 @@ trait StatusService extends BaseService {
 
       complete(statusObj)
     }
-  }
+  } ~
+    pathPrefix("uff") {
+      get {
+        complete("")
+      }
+    }
 
   implicit class TryWithOption[T](tryThis: Try[T]) {
     def getAsOption = tryThis match {
